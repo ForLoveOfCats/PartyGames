@@ -2,6 +2,15 @@ using System;
 using Godot;
 
 
+const float MODE_START_DELAY = 5f; //In seconds
+
+enum MODE {NONE, LAVA};
+static MODE CurrentMode = MODE.NONE;
+static bool Playing = false; //Is the *local* player currently playing
+
+static float StartTimer = 0f; //In seconds
+
+
 
 private class CustomCommands
 {
@@ -14,6 +23,17 @@ private class CustomCommands
 
 	public bool Start()
 	{
+		Self.StartLava();
+		return true;
+	}
+
+	public bool Reset()
+	{
+		CurrentMode = MODE.NONE;
+		Playing = false;
+
+		Game.PossessedPlayer.SetFreeze(false);
+
 		return true;
 	}
 }
@@ -28,6 +48,44 @@ public class PartyGamesGm : Gamemode
 			Net.SteelRpc(Scripting.Self, nameof(Scripting.RequestGmLoad), OwnName); //Load same gamemode on all connected clients
 
 		API.Gm = new CustomCommands(this);
+		API.Gm.Reset();
+	}
+
+
+	public override void _Process(float Delta)
+	{
+		if(Playing)
+		{
+			if(CurrentMode == MODE.LAVA)
+			{
+				if(Game.PossessedPlayer.IsOnFloor())
+				{
+					Lose();
+				}
+			}
+		}
+		else if(CurrentMode != MODE.NONE)
+		{
+			StartTimer += Delta;
+
+			if(StartTimer >= MODE_START_DELAY)
+			{
+				Playing = true;
+			}
+		}
+	}
+
+
+	public void StartLava()
+	{
+		CurrentMode = MODE.LAVA;
+	}
+
+
+	public void Lose()
+	{
+		Game.PossessedPlayer.SetFreeze(true);
+		Game.PossessedPlayer.MovementReset();
 	}
 
 
@@ -44,6 +102,24 @@ public class PartyGamesGm : Gamemode
 			Net.SteelRpc(Scripting.Self, nameof(Scripting.RequestGmUnload)); //Unload gamemode on all clients
 
 		API.Gm = new API.EmptyCustomCommands();
+	}
+
+
+	public override bool ShouldPlayerMove(Vector3 Position)
+	{
+		if(Playing)
+		{
+			if(CurrentMode == MODE.LAVA)
+			{
+				if(Position.y < -(World.PlatformSize*10))
+				{
+					Lose();
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }
 

@@ -76,9 +76,13 @@ public class PartyGamesGm : Gamemode
 	}
 
 
+	[Remote]
 	public void StartLava()
 	{
 		CurrentMode = MODE.LAVA;
+
+		if(Net.Work.IsNetworkServer())
+			Net.SteelRpc(this, nameof(StartLava));
 	}
 
 

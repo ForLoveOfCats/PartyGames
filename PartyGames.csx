@@ -15,6 +15,7 @@ static float StartTimer = 0f; //In seconds
 static float TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
 
 static Random Rand = new Random();
+static Node MiniHud;
 static Label MessageLabel;
 
 
@@ -65,8 +66,9 @@ public class PartyGamesGm : Gamemode
 
 		API.Gm = new CustomCommands(this);
 
-		MessageLabel = GD.Load<PackedScene>($"{LoadPath}/MessageLabel.tscn").Instance() as Label;
-		Game.PossessedPlayer.HUDInstance.GetNode("CLayer/CrossCenter").AddChild(MessageLabel);
+		MiniHud = GD.Load<PackedScene>($"{LoadPath}/MiniHud.tscn").Instance() as Node;
+		MessageLabel = MiniHud.GetNode<Label>("VBoxContainer/CenterContainer/MessageLabel");
+		Game.PossessedPlayer.HUDInstance.GetNode("CLayer").AddChild(MiniHud);
 
 		API.Gm.Reset();
 	}
@@ -149,7 +151,7 @@ public class PartyGamesGm : Gamemode
 			Net.SteelRpc(Scripting.Self, nameof(Scripting.RequestGmUnload)); //Unload gamemode on all clients
 
 		API.Gm = new API.EmptyCustomCommands();
-		MessageLabel.QueueFree();
+		MiniHud.QueueFree();
 	}
 
 

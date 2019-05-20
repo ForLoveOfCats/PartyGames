@@ -46,6 +46,7 @@ private class CustomCommands
 		StartTimer = 0f;
 		CurrentMode = MODE.NONE;
 		Playing = false;
+		MessageLabel.Hide();
 
 		Game.PossessedPlayer.SetFreeze(false);
 
@@ -63,11 +64,11 @@ public class PartyGamesGm : Gamemode
 			Net.SteelRpc(Scripting.Self, nameof(Scripting.RequestGmLoad), OwnName); //Load same gamemode on all connected clients
 
 		API.Gm = new CustomCommands(this);
-		API.Gm.Reset();
 
 		MessageLabel = GD.Load<PackedScene>($"{LoadPath}/MessageLabel.tscn").Instance() as Label;
 		Game.PossessedPlayer.HUDInstance.GetNode("CLayer/CrossCenter").AddChild(MessageLabel);
-		MessageLabel.Hide();
+
+		API.Gm.Reset();
 	}
 
 

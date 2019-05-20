@@ -151,6 +151,26 @@ public class PartyGamesGm : Gamemode
 
 
 	[Remote]
+	public void ClearScores()
+	{
+		Scores.Clear();
+	}
+
+
+	[Remote]
+	public void UpdateScore(int Id, int Score) //Yes we are syncing scores one at a time. Why? Because I am lazy
+	{
+		if(!Net.Work.IsNetworkServer())
+		{
+			Net.SteelRpc(this, nameof(UpdateScore), Id, Score);
+			return;
+		}
+
+		Scores[Id] = Score;
+	}
+
+
+	[Remote]
 	public void StartLava()
 	{
 		StartTimer = 0f;

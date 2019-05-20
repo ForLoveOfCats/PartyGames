@@ -15,6 +15,7 @@ static float StartTimer = 0f; //In seconds
 static float TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
 
 static Random Rand = new Random();
+static Label MessageLabel;
 
 
 private class CustomCommands
@@ -63,6 +64,10 @@ public class PartyGamesGm : Gamemode
 
 		API.Gm = new CustomCommands(this);
 		API.Gm.Reset();
+
+		MessageLabel = GD.Load<PackedScene>($"{LoadPath}/MessageLabel.tscn").Instance() as Label;
+		Game.PossessedPlayer.HUDInstance.GetNode("CLayer/CrossCenter").AddChild(MessageLabel);
+		MessageLabel.Hide();
 	}
 
 
@@ -93,9 +98,15 @@ public class PartyGamesGm : Gamemode
 		{
 			StartTimer += Delta;
 
+			if(CurrentMode == MODE.LAVA)
+			{
+				MessageLabel.Text = $"The floor is lava in {(int)(MODE_START_DELAY-StartTimer)}";
+			}
+
 			if(StartTimer >= MODE_START_DELAY)
 			{
 				Playing = true;
+				MessageLabel.Hide();
 			}
 		}
 	}
@@ -107,6 +118,8 @@ public class PartyGamesGm : Gamemode
 		StartTimer = 0f;
 		CurrentMode = MODE.LAVA;
 
+		MessageLabel.Show();
+
 		if(Net.Work.IsNetworkServer())
 			Net.SteelRpc(this, nameof(StartLava));
 	}
@@ -116,6 +129,9 @@ public class PartyGamesGm : Gamemode
 	{
 		Game.PossessedPlayer.SetFreeze(true);
 		Game.PossessedPlayer.MovementReset();
+
+		MessageLabel.Show();
+		MessageLabel.Text = "You lost!";
 	}
 
 
@@ -132,6 +148,7 @@ public class PartyGamesGm : Gamemode
 			Net.SteelRpc(Scripting.Self, nameof(Scripting.RequestGmUnload)); //Unload gamemode on all clients
 
 		API.Gm = new API.EmptyCustomCommands();
+		MessageLabel.QueueFree();
 	}
 
 

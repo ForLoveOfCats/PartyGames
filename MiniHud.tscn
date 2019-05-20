@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://UI/Fonts/OverpassSemibold.otf" type="DynamicFontData" id=1]
 
@@ -7,6 +7,12 @@ size = 40
 font_data = ExtResource( 1 )
 
 [sub_resource type="StyleBoxEmpty" id=2]
+
+[sub_resource type="StyleBoxEmpty" id=3]
+
+[sub_resource type="StyleBoxEmpty" id=4]
+
+[sub_resource type="StyleBoxEmpty" id=5]
 
 [node name="Node" type="Node"]
 
@@ -44,3 +50,49 @@ custom_styles/panel = SubResource( 2 )
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+custom_constants/separation = 0
+
+[node name="Panel" type="Panel" parent="HBoxContainer"]
+margin_right = 781.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = SubResource( 3 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+margin_left = 781.0
+margin_right = 1015.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.3
+custom_constants/separation = 0
+
+[node name="Panel" type="Panel" parent="HBoxContainer/VBoxContainer"]
+margin_right = 234.0
+margin_bottom = 300.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = SubResource( 4 )
+
+[node name="ScoreContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer"]
+margin_top = 300.0
+margin_right = 234.0
+margin_bottom = 300.0
+
+[node name="Panel2" type="Panel" parent="HBoxContainer/VBoxContainer"]
+margin_top = 300.0
+margin_right = 234.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = SubResource( 5 )
+
+[node name="Panel2" type="Panel" parent="HBoxContainer"]
+margin_left = 1015.0
+margin_right = 1024.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.01
+custom_styles/panel = SubResource( 3 )

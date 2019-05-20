@@ -11,12 +11,18 @@ enum MODE {NONE, LAVA};
 static MODE CurrentMode = MODE.NONE;
 static bool Playing = false; //Is the *local* player currently playing
 
+static Dictionary<int, int> Scores = new Dictionary<int, int>();
+
 static float StartTimer = 0f; //In seconds
 static float TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
 
 static Random Rand = new Random();
 static Node MiniHud;
 static Label MessageLabel;
+static VBoxContainer ScoreContainer;
+
+static PackedScene ScoreLabelScene;
+
 
 
 private class CustomCommands
@@ -68,7 +74,19 @@ public class PartyGamesGm : Gamemode
 
 		MiniHud = GD.Load<PackedScene>($"{LoadPath}/MiniHud.tscn").Instance() as Node;
 		MessageLabel = MiniHud.GetNode<Label>("VBoxContainer/CenterContainer/MessageLabel");
+		ScoreContainer = MiniHud.GetNode<VBoxContainer>("HBoxContainer/VBoxContainer/ScoreContainer");
 		Game.PossessedPlayer.HUDInstance.GetNode("CLayer").AddChild(MiniHud);
+
+		ScoreLabelScene = GD.Load<PackedScene>("res://UI/ItemCountLabel.tscn");
+
+		if(Net.Work.IsNetworkServer())
+		{
+			foreach(int Id in Net.PeerList)
+			{
+				Scores[Id] = 0;
+			}
+			UpdateHudScores();
+		}
 
 		API.Gm.Reset();
 	}
@@ -111,6 +129,23 @@ public class PartyGamesGm : Gamemode
 				Playing = true;
 				MessageLabel.Hide();
 			}
+		}
+	}
+
+
+	public void UpdateHudScores()
+	{
+		foreach(Node Child in ScoreContainer.GetChildren())
+		{
+			Child.QueueFree();
+		}
+
+		foreach(int Id in Net.PeerList)
+		{
+			Label ScoreLabel = ScoreLabelScene.Instance() as Label;
+			ScoreLabel.SetAlign(Label.AlignEnum.Right);
+			ScoreLabel.Text = $"{Net.Nicknames[Id]}: {Scores[Id]}";
+			ScoreContainer.AddChild(ScoreLabel);
 		}
 	}
 

@@ -101,7 +101,7 @@ public class PartyGamesGm : Gamemode
 
 			if(CurrentMode == MODE.LAVA)
 			{
-				MessageLabel.Text = $"The floor is lava in {(int)(MODE_START_DELAY-StartTimer)}";
+				MessageLabel.Text = $"The floor is lava in {(int)(MODE_START_DELAY-StartTimer)} seconds!";
 			}
 
 			if(StartTimer >= MODE_START_DELAY)

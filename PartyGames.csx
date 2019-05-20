@@ -42,6 +42,7 @@ private class CustomCommands
 		if(CurrentMode == MODE.LAVA)
 			API.ReloadSave();
 
+		StartTimer = 0f;
 		CurrentMode = MODE.NONE;
 		Playing = false;
 
@@ -103,6 +104,7 @@ public class PartyGamesGm : Gamemode
 	[Remote]
 	public void StartLava()
 	{
+		StartTimer = 0f;
 		CurrentMode = MODE.LAVA;
 
 		if(Net.Work.IsNetworkServer())

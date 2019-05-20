@@ -1,15 +1,20 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using Godot;
 
 
 const float MODE_START_DELAY = 5f; //In seconds
+const int STRUCTURES_REMOVE_RATE = 5; //Structures per second
 
 enum MODE {NONE, LAVA};
 static MODE CurrentMode = MODE.NONE;
 static bool Playing = false; //Is the *local* player currently playing
 
 static float StartTimer = 0f; //In seconds
+static float TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
 
+static Random Rand = new Random();
 
 
 private class CustomCommands
@@ -34,6 +39,9 @@ private class CustomCommands
 
 	public bool Reset()
 	{
+		if(CurrentMode == MODE.LAVA)
+			API.ReloadSave();
+
 		CurrentMode = MODE.NONE;
 		Playing = false;
 
@@ -66,6 +74,17 @@ public class PartyGamesGm : Gamemode
 				if(Game.PossessedPlayer.IsOnFloor())
 				{
 					Lose();
+				}
+
+				if(Net.Work.IsNetworkServer())
+				{
+					TimeToRemoveStructure -= Delta;
+					if(TimeToRemoveStructure <= 0f)
+					{
+						TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
+						List<Structure> Structures = World.Chunks.ElementAt(Rand.Next(0, World.Chunks.Count)).Value.Structures;
+						Structures[Rand.Next(0, Structures.Count)].NetRemove();
+					}
 				}
 			}
 		}

@@ -23,8 +23,13 @@ private class CustomCommands
 
 	public bool Start()
 	{
-		Self.StartLava();
-		return true;
+		if(Net.Work.IsNetworkServer())
+		{
+			Self.StartLava();
+			return true;
+		}
+
+		return false;
 	}
 
 	public bool Reset()

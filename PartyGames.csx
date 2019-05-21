@@ -57,6 +57,8 @@ private class CustomCommands
 		MessageLabel.Hide();
 
 		Game.PossessedPlayer.SetFreeze(false);
+		Game.PossessedPlayer.Inventory = new Items.Instance[10];
+		Game.PossessedPlayer.HUDInstance.HotbarUpdate();
 
 		return true;
 	}
@@ -196,6 +198,8 @@ public class PartyGamesGm : Gamemode
 	{
 		Game.PossessedPlayer.SetFreeze(false);
 		Game.PossessedPlayer.MovementReset();
+		Game.PossessedPlayer.Inventory = new Items.Instance[10];
+		Game.PossessedPlayer.HUDInstance.HotbarUpdate();
 	}
 
 

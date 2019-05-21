@@ -204,7 +204,21 @@ public class PartyGamesGm : Gamemode
 	public override void OnPlayerConnect(int Id)
 	{
 		if(Net.Work.IsNetworkServer())
+		{
 			Scripting.Self.RpcId(Id, nameof(Scripting.RequestGmLoad), OwnName); //Load same gamemode on newly connected client
+			Scores[Id] = 0;
+			UpdateHudScores();
+		}
+	}
+
+
+	public override void OnPlayerDisconnect(int Id)
+	{
+		if(Net.Work.IsNetworkServer())
+		{
+			Scores.Remove(Id);
+			UpdateHudScores();
+		}
 	}
 
 

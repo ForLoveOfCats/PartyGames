@@ -192,6 +192,14 @@ public class PartyGamesGm : Gamemode
 
 
 	[Remote]
+	public void End()
+	{
+		Game.PossessedPlayer.SetFreeze(false);
+		Game.PossessedPlayer.MovementReset();
+	}
+
+
+	[Remote]
 	public void StartLava()
 	{
 		StartTimer = 0f;
@@ -221,6 +229,8 @@ public class PartyGamesGm : Gamemode
 	{
 		Game.PossessedPlayer.SetFreeze(true);
 		Game.PossessedPlayer.MovementReset();
+		Playing = false;
+		CurrentMode = MODE.NONE;
 
 		MessageLabel.Show();
 		MessageLabel.Text = "You lost!";
@@ -245,6 +255,8 @@ public class PartyGamesGm : Gamemode
 
 			SyncAllScores(Peer);
 		}
+
+		Net.SteelRpc(this, nameof(End));
 	}
 
 

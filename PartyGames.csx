@@ -7,7 +7,7 @@ using Godot;
 const float MODE_START_DELAY = 5f; //In seconds
 const int STRUCTURES_REMOVE_RATE = 5; //Structures per second
 
-enum MODE {NONE, LAVA};
+enum MODE {NONE, LAVA, SPLEEF};
 static MODE CurrentMode = MODE.NONE;
 static bool Playing = false; //Is the *local* player currently playing
 
@@ -128,6 +128,10 @@ public class PartyGamesGm : Gamemode
 			{
 				MessageLabel.Text = $"The floor is lava in {(int)(MODE_START_DELAY-StartTimer)} seconds!";
 			}
+			else if(CurrentMode == MODE.SPLEEF)
+			{
+				MessageLabel.Text = $"Spleef begins in {(int)(MODE_START_DELAY-StartTimer)} seconds!";
+			}
 
 			if(StartTimer >= MODE_START_DELAY)
 			{
@@ -189,7 +193,19 @@ public class PartyGamesGm : Gamemode
 
 	public void StartNext()
 	{
-		StartLava();
+		End();
+
+		int Num = Rand.Next(0,2);
+		switch(Num)
+		{
+			case 0:
+				StartLava();
+				break;
+
+			case 1:
+				StartSpleef();
+				break;
+		}
 	}
 
 
@@ -213,6 +229,36 @@ public class PartyGamesGm : Gamemode
 
 		if(Net.Work.IsNetworkServer())
 			Net.SteelRpc(this, nameof(StartLava));
+	}
+
+
+	[Remote]
+	public void StartSpleef()
+	{
+		StartTimer = 0f;
+		CurrentMode = MODE.SPLEEF;
+
+		MessageLabel.Show();
+
+
+		if(Net.Work.IsNetworkServer())
+		{
+			World.Clear();
+			World.DefaultPlatforms();
+
+			int Size = 20;
+			for(int X = (int)(-Size/2); X <= (int)(Size/2); X++)
+			{
+				for(int Z = (int)(-Size/2); Z <= (int)(Size/2); Z++)
+				{
+					World.Place(Items.TYPE.PLATFORM, new Vector3(X*World.PlatformSize, 10*World.PlatformSize, Z*World.PlatformSize), new Vector3(), 1);
+				}
+			}
+
+			Net.SteelRpc(this, nameof(StartSpleef));
+		}
+
+		Game.PossessedPlayer.Translation = new Vector3(0,10*World.PlatformSize + 2,0);
 	}
 
 
@@ -348,6 +394,9 @@ public class PartyGamesGm : Gamemode
 
 	public override bool ShouldRemoveStructure(Items.TYPE BranchType, Vector3 Position, Vector3 Rotation, int OwnerId)
 	{
+		if(CurrentMode == MODE.SPLEEF)
+			return true;
+
 		return false;
 	}
 }

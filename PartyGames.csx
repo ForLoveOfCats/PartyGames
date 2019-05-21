@@ -248,6 +248,8 @@ public class PartyGamesGm : Gamemode
 		World.Clear();
 		if(Net.Work.IsNetworkServer())
 		{
+			Net.SteelRpc(this, nameof(StartSpleef));
+
 			World.DefaultPlatforms();
 
 			int Size = 20;
@@ -258,8 +260,6 @@ public class PartyGamesGm : Gamemode
 					World.Place(Items.TYPE.PLATFORM, new Vector3(X*World.PlatformSize, 10*World.PlatformSize, Z*World.PlatformSize), new Vector3(), 1);
 				}
 			}
-
-			Net.SteelRpc(this, nameof(StartSpleef));
 		}
 
 		Game.PossessedPlayer.Translation = new Vector3(0,10*World.PlatformSize + 2,0);

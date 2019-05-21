@@ -162,6 +162,8 @@ public class PartyGamesGm : Gamemode
 					while(!Placed)
 					{
 						List<Structure> Structures = World.Chunks.ElementAt(Rand.Next(0, World.Chunks.Count)).Value.Structures;
+						if(Structures.Count <= 0)
+							continue;
 						Structure Item = Structures[Rand.Next(0, Structures.Count)];
 						if(Item.Type == Items.TYPE.PLATFORM)
 						{
@@ -439,6 +441,7 @@ public class PartyGamesGm : Gamemode
 		if(CurrentMode == MODE.FIND)
 		{
 			Win();
+			CallDeferred(nameof(End));
 			Net.SteelRpc(this, nameof(Lose));
 			Net.SteelRpc(this, nameof(End));
 		}

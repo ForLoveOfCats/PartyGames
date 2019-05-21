@@ -119,6 +119,11 @@ public class PartyGamesGm : Gamemode
 					}
 				}
 			}
+			else if(CurrentMode == MODE.SPLEEF)
+			{
+				if(Game.PossessedPlayer.Translation.y <= 5*World.PlatformSize)
+					Lose();
+			}
 		}
 		else if(CurrentMode != MODE.NONE)
 		{
@@ -267,7 +272,7 @@ public class PartyGamesGm : Gamemode
 	{
 		PlayingPeers.Remove(Id);
 
-		if(CurrentMode == MODE.LAVA && Playing && PlayingPeers.Count <= 1)
+		if( (CurrentMode == MODE.LAVA || CurrentMode == MODE.SPLEEF) && Playing && PlayingPeers.Count <= 1)
 		{
 			Win();
 			PlayingPeers.Clear();
@@ -306,6 +311,7 @@ public class PartyGamesGm : Gamemode
 			SyncAllScores(Peer);
 		}
 
+		End();
 		Net.SteelRpc(this, nameof(End));
 	}
 

@@ -87,6 +87,8 @@ public class PartyGamesGm : Gamemode
 			}
 			UpdateHudScores();
 		}
+		else
+			RpcId(Net.ServerId, nameof(SyncAllScores), Net.Work.GetNetworkUniqueId());
 
 		API.Gm.Reset();
 	}
@@ -140,11 +142,11 @@ public class PartyGamesGm : Gamemode
 			Child.QueueFree();
 		}
 
-		foreach(int Id in Net.PeerList)
+		foreach(KeyValuePair<int, int> Pair in Scores)
 		{
 			Label ScoreLabel = ScoreLabelScene.Instance() as Label;
 			ScoreLabel.SetAlign(Label.AlignEnum.Right);
-			ScoreLabel.Text = $"{Net.Nicknames[Id]}: {Scores[Id]}";
+			ScoreLabel.Text = $"{Net.Nicknames[Pair.Key]}: {Pair.Value}";
 			ScoreContainer.AddChild(ScoreLabel);
 		}
 	}
@@ -158,15 +160,21 @@ public class PartyGamesGm : Gamemode
 
 
 	[Remote]
-	public void UpdateScore(int Id, int Score) //Yes we are syncing scores one at a time. Why? Because I am lazy
+	public void SyncScore(int Id, int Score) //Yes we are syncing scores one at a time. Why? Because I am lazy
 	{
-		if(!Net.Work.IsNetworkServer())
-		{
-			Net.SteelRpc(this, nameof(UpdateScore), Id, Score);
-			return;
-		}
-
 		Scores[Id] = Score;
+		UpdateHudScores();
+	}
+
+
+	[Remote]
+	public void SyncAllScores(int Reciever)
+	{
+		Console.Log($"Sending all scores to {Reciever}");
+		foreach(KeyValuePair<int, int> Pair in Scores)
+		{
+			RpcId(Reciever, nameof(SyncScore), Pair.Key, Pair.Value);
+		}
 	}
 
 

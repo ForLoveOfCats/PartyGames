@@ -156,6 +156,11 @@ public class PartyGamesGm : Gamemode
 					PlayingPeers.Add(Peer);
 				}
 
+				if(CurrentMode == MODE.SPLEEF)
+				{
+					Game.PossessedPlayer.SetFreeze(false);
+				}
+
 				if(CurrentMode == MODE.FIND && Net.Work.IsNetworkServer())
 				{
 					bool Placed = false;
@@ -294,6 +299,7 @@ public class PartyGamesGm : Gamemode
 		}
 
 		Game.PossessedPlayer.Translation = new Vector3(0,12*World.PlatformSize,0);
+		Game.PossessedPlayer.SetFreeze(true);
 	}
 
 

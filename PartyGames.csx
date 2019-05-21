@@ -245,10 +245,9 @@ public class PartyGamesGm : Gamemode
 
 		MessageLabel.Show();
 
-
+		World.Clear();
 		if(Net.Work.IsNetworkServer())
 		{
-			World.Clear();
 			World.DefaultPlatforms();
 
 			int Size = 20;

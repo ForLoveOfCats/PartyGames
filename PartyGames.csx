@@ -305,6 +305,8 @@ public class PartyGamesGm : Gamemode
 
 		MessageLabel.Show();
 
+		Game.PossessedPlayer.MovementReset();
+
 		if(Net.Work.IsNetworkServer())
 			Net.SteelRpc(this, nameof(StartFind));
 	}

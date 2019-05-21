@@ -273,7 +273,7 @@ public class PartyGamesGm : Gamemode
 
 			foreach(int Peer in Net.PeerList)
 			{
-				if(Peer != Id)
+				if(Peer != Id && Peer != Net.ServerId)
 					SyncAllScores(Peer);
 			}
 		}
@@ -289,7 +289,7 @@ public class PartyGamesGm : Gamemode
 
 			foreach(int Peer in Net.PeerList)
 			{
-				if(Peer != Id) //Just in case, should already be out of Net.PeerList
+				if(Peer != Id && Peer != Net.ServerId)
 					SyncAllScores(Peer);
 			}
 		}

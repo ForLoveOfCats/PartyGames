@@ -338,6 +338,18 @@ public class PartyGamesGm : Gamemode
 
 		return true;
 	}
+
+
+	public override bool ShouldPlaceStructure(Items.TYPE BranchType, Vector3 Position, Vector3 Rotation)
+	{
+		return false;
+	}
+
+
+	public override bool ShouldRemoveStructure(Items.TYPE BranchType, Vector3 Position, Vector3 Rotation, int OwnerId)
+	{
+		return false;
+	}
 }
 
 

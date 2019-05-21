@@ -293,7 +293,7 @@ public class PartyGamesGm : Gamemode
 			}
 		}
 
-		Game.PossessedPlayer.Translation = new Vector3(0,10*World.PlatformSize + 2,0);
+		Game.PossessedPlayer.Translation = new Vector3(0,12*World.PlatformSize,0);
 	}
 
 

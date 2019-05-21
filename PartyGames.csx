@@ -7,7 +7,7 @@ using Godot;
 const float MODE_START_DELAY = 5f; //In seconds
 const int STRUCTURES_REMOVE_RATE = 5; //Structures per second
 
-enum MODE {NONE, LAVA, SPLEEF};
+enum MODE {NONE, LAVA, SPLEEF, FIND};
 static MODE CurrentMode = MODE.NONE;
 static bool Playing = false; //Is the *local* player currently playing
 
@@ -122,7 +122,10 @@ public class PartyGamesGm : Gamemode
 			else if(CurrentMode == MODE.SPLEEF)
 			{
 				if(Game.PossessedPlayer.Translation.y <= 5*World.PlatformSize)
+				{
+					Console.Log("Mode is spleef");
 					Lose();
+				}
 			}
 		}
 		else if(CurrentMode != MODE.NONE)
@@ -137,6 +140,10 @@ public class PartyGamesGm : Gamemode
 			{
 				MessageLabel.Text = $"Spleef begins in {(int)(MODE_START_DELAY-StartTimer)} seconds!";
 			}
+			else if(CurrentMode == MODE.FIND)
+			{
+				MessageLabel.Text = $"Find the item starts in {(int)(MODE_START_DELAY-StartTimer)} seconds!";
+			}
 
 			if(StartTimer >= MODE_START_DELAY)
 			{
@@ -147,6 +154,24 @@ public class PartyGamesGm : Gamemode
 				foreach(int Peer in Net.PeerList)
 				{
 					PlayingPeers.Add(Peer);
+				}
+
+				if(CurrentMode == MODE.FIND && Net.Work.IsNetworkServer())
+				{
+					bool Placed = false;
+					while(!Placed)
+					{
+						List<Structure> Structures = World.Chunks.ElementAt(Rand.Next(0, World.Chunks.Count)).Value.Structures;
+						Structure Item = Structures[Rand.Next(0, Structures.Count)];
+						if(Item.Type == Items.TYPE.PLATFORM)
+						{
+							Vector3 Trans = Item.Translation;
+							Trans.y += 1;
+							World.Self.DropItem(Items.TYPE.PLATFORM, Trans, new Vector3());
+							Placed = true;
+							Console.Log("Placed item");
+						}
+					}
 				}
 			}
 		}
@@ -200,7 +225,7 @@ public class PartyGamesGm : Gamemode
 	{
 		End();
 
-		int Num = Rand.Next(0,2);
+		int Num = Rand.Next(0,3);
 		switch(Num)
 		{
 			case 0:
@@ -209,6 +234,10 @@ public class PartyGamesGm : Gamemode
 
 			case 1:
 				StartSpleef();
+				break;
+
+			case 2:
+				StartFind();
 				break;
 		}
 	}
@@ -267,6 +296,19 @@ public class PartyGamesGm : Gamemode
 
 
 	[Remote]
+	public void StartFind()
+	{
+		StartTimer = 0f;
+		CurrentMode = MODE.FIND;
+
+		MessageLabel.Show();
+
+		if(Net.Work.IsNetworkServer())
+			Net.SteelRpc(this, nameof(StartFind));
+	}
+
+
+	[Remote]
 	public void ReportLoss(int Id) //Run on every other player upon loss
 	{
 		PlayingPeers.Remove(Id);
@@ -279,6 +321,7 @@ public class PartyGamesGm : Gamemode
 	}
 
 
+	[Remote]
 	public void Lose()
 	{
 		Game.PossessedPlayer.SetFreeze(true);
@@ -385,6 +428,19 @@ public class PartyGamesGm : Gamemode
 					return false;
 				}
 			}
+		}
+
+		return true;
+	}
+
+
+	public override bool ShouldPickupItem(Items.TYPE Type)
+	{
+		if(CurrentMode == MODE.FIND)
+		{
+			Win();
+			Net.SteelRpc(this, nameof(Lose));
+			Net.SteelRpc(this, nameof(End));
 		}
 
 		return true;

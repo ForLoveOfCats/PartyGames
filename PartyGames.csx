@@ -5,7 +5,7 @@ using Godot;
 
 
 const float MODE_START_DELAY = 5f; //In seconds
-const int STRUCTURES_REMOVE_RATE = 5; //Structures per second
+const int STRUCTURES_REMOVE_RATE = 1; //Structures per second
 
 enum MODE {NONE, LAVA, SPLEEF, FIND};
 static MODE CurrentMode = MODE.NONE;

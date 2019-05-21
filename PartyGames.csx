@@ -12,6 +12,7 @@ static MODE CurrentMode = MODE.NONE;
 static bool Playing = false; //Is the *local* player currently playing
 
 static Dictionary<int, int> Scores = new Dictionary<int, int>();
+static List<int> PlayingPeers = new List<int>();
 
 static float StartTimer = 0f; //In seconds
 static float TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
@@ -38,7 +39,7 @@ private class CustomCommands
 	{
 		if(Net.Work.IsNetworkServer())
 		{
-			Self.StartLava();
+			Self.StartNext();
 			return true;
 		}
 
@@ -130,6 +131,12 @@ public class PartyGamesGm : Gamemode
 			{
 				Playing = true;
 				MessageLabel.Hide();
+
+				PlayingPeers.Clear();
+				foreach(int Peer in Net.PeerList)
+				{
+					PlayingPeers.Add(Peer);
+				}
 			}
 		}
 	}
@@ -178,6 +185,12 @@ public class PartyGamesGm : Gamemode
 	}
 
 
+	public void StartNext()
+	{
+		StartLava();
+	}
+
+
 	[Remote]
 	public void StartLava()
 	{
@@ -191,6 +204,19 @@ public class PartyGamesGm : Gamemode
 	}
 
 
+	[Remote]
+	public void ReportLoss(int Id) //Run on every other player upon loss
+	{
+		PlayingPeers.Remove(Id);
+
+		if(CurrentMode == MODE.LAVA && Playing && PlayingPeers.Count <= 1)
+		{
+			Win();
+			PlayingPeers.Clear();
+		}
+	}
+
+
 	public void Lose()
 	{
 		Game.PossessedPlayer.SetFreeze(true);
@@ -198,6 +224,42 @@ public class PartyGamesGm : Gamemode
 
 		MessageLabel.Show();
 		MessageLabel.Text = "You lost!";
+
+		Net.SteelRpc(this, nameof(ReportLoss), Net.Work.GetNetworkUniqueId());
+	}
+
+
+	[Remote]
+	public void ReportWin(int Id) //Run on the server upon win
+	{
+		if(!Net.Work.IsNetworkServer())
+			return;
+
+		Scores[Id] += 1;
+		UpdateHudScores();
+
+		foreach(int Peer in Net.PeerList)
+		{
+			if(Peer == Net.Work.GetNetworkUniqueId())
+				continue;
+
+			SyncAllScores(Peer);
+		}
+	}
+
+
+	[Remote]
+	public void Win()
+	{
+		MessageLabel.Show();
+		MessageLabel.Text = "You won!";
+		Playing = false;
+		CurrentMode = MODE.NONE;
+
+		if(Net.Work.IsNetworkServer())
+			ReportWin(Net.ServerId);
+		else
+			RpcId(Net.ServerId, nameof(ReportWin), Net.Work.GetNetworkUniqueId());
 	}
 
 

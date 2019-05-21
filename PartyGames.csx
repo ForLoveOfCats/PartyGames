@@ -170,7 +170,7 @@ public class PartyGamesGm : Gamemode
 	[Remote]
 	public void SyncAllScores(int Reciever)
 	{
-		Console.Log($"Sending all scores to {Reciever}");
+		RpcId(Reciever, nameof(ClearScores));
 		foreach(KeyValuePair<int, int> Pair in Scores)
 		{
 			RpcId(Reciever, nameof(SyncScore), Pair.Key, Pair.Value);
@@ -208,6 +208,12 @@ public class PartyGamesGm : Gamemode
 			Scripting.Self.RpcId(Id, nameof(Scripting.RequestGmLoad), OwnName); //Load same gamemode on newly connected client
 			Scores[Id] = 0;
 			UpdateHudScores();
+
+			foreach(int Peer in Net.PeerList)
+			{
+				if(Peer != Id)
+					SyncAllScores(Peer);
+			}
 		}
 	}
 
@@ -218,6 +224,12 @@ public class PartyGamesGm : Gamemode
 		{
 			Scores.Remove(Id);
 			UpdateHudScores();
+
+			foreach(int Peer in Net.PeerList)
+			{
+				if(Peer != Id) //Just in case, should already be out of Net.PeerList
+					SyncAllScores(Peer);
+			}
 		}
 	}
 

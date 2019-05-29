@@ -107,17 +107,6 @@ public class PartyGamesGm : Gamemode
 				{
 					Lose();
 				}
-
-				if(Net.Work.IsNetworkServer())
-				{
-					TimeToRemoveStructure -= Delta;
-					if(TimeToRemoveStructure <= 0f)
-					{
-						TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
-						List<Structure> Structures = World.Chunks.ElementAt(Rand.Next(0, World.Chunks.Count)).Value.Structures;
-						Structures[Rand.Next(0, Structures.Count)].NetRemove();
-					}
-				}
 			}
 			else if(CurrentMode == MODE.SPLEEF)
 			{
@@ -441,6 +430,18 @@ public class PartyGamesGm : Gamemode
 		}
 
 		return true;
+	}
+
+
+	public override void OnPlayerCollide(KinematicCollision Collision)
+	{
+		if(Playing && CurrentMode == MODE.LAVA)
+		{
+			if(Collision.Collider is Structure Item)
+			{
+				Item.NetRemove();
+			}
+		}
 	}
 
 

@@ -5,7 +5,7 @@ using Godot;
 
 
 const float MODE_START_DELAY = 5f; //In seconds
-const int STRUCTURES_REMOVE_RATE = 1; //Structures per second
+const int TILE_REMOVE_RATE = 1; //Tiles per second
 
 enum MODE {NONE, LAVA, SPLEEF, FIND};
 static MODE CurrentMode = MODE.NONE;
@@ -15,7 +15,7 @@ static Dictionary<int, int> Scores = new Dictionary<int, int>();
 static List<int> PlayingPeers = new List<int>();
 
 static float StartTimer = 0f; //In seconds
-static float TimeToRemoveStructure = 1/STRUCTURES_REMOVE_RATE;
+static float TimeToRemoveTile = 1/TILE_REMOVE_RATE;
 
 static Random Rand = new Random();
 static Node MiniHud;
@@ -155,15 +155,15 @@ public class PartyGamesGm : Gamemode
 					bool Placed = false;
 					while(!Placed)
 					{
-						List<Structure> Structures = World.Chunks.ElementAt(Rand.Next(0, World.Chunks.Count)).Value.Structures;
-						if(Structures.Count <= 0)
+						List<Tile> Tiles = World.Chunks.ElementAt(Rand.Next(0, World.Chunks.Count)).Value.Tiles;
+						if(Tiles.Count <= 0)
 							continue;
-						Structure Item = Structures[Rand.Next(0, Structures.Count)];
-						if(Item.Type == Items.TYPE.PLATFORM)
+						Tile Item = Tiles[Rand.Next(0, Tiles.Count)];
+						if(Item.Type == Items.ID.PLATFORM)
 						{
 							Vector3 Trans = Item.Translation;
 							Trans.y += 1;
-							World.Self.DropItem(Items.TYPE.PLATFORM, Trans, new Vector3());
+							World.Self.DropItem(Items.ID.PLATFORM, Trans, new Vector3());
 							Placed = true;
 							Console.Log("Placed item");
 						}
@@ -282,7 +282,7 @@ public class PartyGamesGm : Gamemode
 			{
 				for(int Z = (int)(-Size/2); Z <= (int)(Size/2); Z++)
 				{
-					World.Place(Items.TYPE.PLATFORM, new Vector3(X*World.PlatformSize, 10*World.PlatformSize, Z*World.PlatformSize), new Vector3(), 1);
+					World.Place(Items.ID.PLATFORM, new Vector3(X*World.PlatformSize, 10*World.PlatformSize, Z*World.PlatformSize), new Vector3(), 1);
 				}
 			}
 		}
@@ -437,7 +437,7 @@ public class PartyGamesGm : Gamemode
 	{
 		if(Playing && CurrentMode == MODE.LAVA)
 		{
-			if(Collision.Collider is Structure Item)
+			if(Collision.Collider is Tile Item)
 			{
 				Item.NetRemove();
 			}
@@ -445,7 +445,7 @@ public class PartyGamesGm : Gamemode
 	}
 
 
-	public override bool ShouldPickupItem(Items.TYPE Type)
+	public override bool ShouldPickupItem(Items.ID Id)
 	{
 		if(CurrentMode == MODE.FIND)
 		{
@@ -459,13 +459,13 @@ public class PartyGamesGm : Gamemode
 	}
 
 
-	public override bool ShouldPlaceStructure(Items.TYPE BranchType, Vector3 Position, Vector3 Rotation)
+	public override bool ShouldPlaceTile(Items.ID BranchId, Vector3 Position, Vector3 Rotation)
 	{
 		return false;
 	}
 
 
-	public override bool ShouldRemoveStructure(Items.TYPE BranchType, Vector3 Position, Vector3 Rotation, int OwnerId)
+	public override bool ShouldRemoveTile(Items.ID BranchId, Vector3 Position, Vector3 Rotation, int OwnerId)
 	{
 		if(CurrentMode == MODE.SPLEEF)
 			return true;
